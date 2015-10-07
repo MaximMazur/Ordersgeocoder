@@ -11,6 +11,8 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
+import org.parceler.Parcels;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -74,7 +76,7 @@ public class DownloadOrders extends IntentService {
                 Type listType = new TypeToken<List<Order>>(){}.getType();
                 List<Order> orders = (List<Order>) gson.fromJson(jsonString, listType);
 
-                Intent i = new Intent().putParcelableArrayListExtra(MapsActivity.PARAM_ORDER_LIST, (ArrayList)orders);
+                Intent i = new Intent().putExtra(MapsActivity.PARAM_ORDER_LIST, Parcels.wrap((ArrayList) orders));
                 pi.send(this, 0, i);
 
             } catch (IOException e) {

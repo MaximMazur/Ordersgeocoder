@@ -15,6 +15,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.parceler.Parcels;
+
 import java.util.List;
 
 import ua.maxim.ordersgeocoder.Data.Order;
@@ -69,18 +71,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         switch (requestCode){
             case mDownloadOrdersTaskCode:
 
-                List<Order> orders = data.getParcelableArrayListExtra(PARAM_ORDER_LIST);
+                List<Order> orders = Parcels.unwrap(data.getParcelableExtra(PARAM_ORDER_LIST));
 
                 for (Order order: orders) {
                     startService(new Intent(this, GetGeodata.class)
-                            .putExtra(PARAM_ORDER, order)
+                            .putExtra(PARAM_ORDER, Parcels.wrap(order))
                             .putExtra(PARAM_PINTENT, piGetGeodata));
                 }
 
                 break;
             case mGetGeodataTaskCode:
 
-                Order order = data.getParcelableExtra(PARAM_ORDER);
+                Order order = Parcels.unwrap(data.getParcelableExtra(PARAM_ORDER));
 
                 drawOrder(order);
 

@@ -1,11 +1,11 @@
 package ua.maxim.ordersgeocoder.Data;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.google.android.gms.maps.model.LatLng;
 
-public class Address implements Parcelable{
+import org.parceler.Parcel;
+
+@Parcel(Parcel.Serialization.BEAN)
+public class Address{
 
     private String country;
     private String zipCode;
@@ -110,46 +110,6 @@ public class Address implements Parcelable{
 
 
         return builder.toString();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getCountry());
-        dest.writeString(getZipCode());
-        dest.writeString(getCity());
-        dest.writeString(getCountryCode());
-        dest.writeString(getStreet());
-        dest.writeString(getHouseNumber());
-        dest.writeDouble(getLatitude());
-        dest.writeDouble(getLongitude());
-    }
-
-    public static Parcelable.Creator<Address> CREATOR = new Creator<Address>() {
-        @Override
-        public Address createFromParcel(Parcel source) {
-            return new Address(source);
-        }
-
-        @Override
-        public Address[] newArray(int size) {
-            return new Address[size];
-        }
-    };
-
-    private Address(Parcel source){
-        setCountry(source.readString());
-        setZipCode(source.readString());
-        setCity(source.readString());
-        setCountryCode(source.readString());
-        setStreet(source.readString());
-        setHouseNumber(source.readString());
-        setLatitude(source.readDouble());
-        setLongitude(source.readDouble());
     }
 
     public boolean isCoordinatesSet() {

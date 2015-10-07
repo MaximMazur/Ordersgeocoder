@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 
+import org.parceler.Parcel;
+import org.parceler.Parcels;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -28,13 +31,13 @@ public class GetGeodata extends IntentService {
     protected void onHandleIntent(Intent intent) {
         PendingIntent pi = intent.getParcelableExtra(MapsActivity.PARAM_PINTENT);
 
-        Order order = intent.getParcelableExtra(MapsActivity.PARAM_ORDER);
+        Order order = Parcels.unwrap(intent.getParcelableExtra(MapsActivity.PARAM_ORDER));
 
         identifyCoordinates(order.getDepartureAddress());
 
         identifyCoordinates(order.getDestinationAddress());
 
-        Intent i = new Intent().putExtra(MapsActivity.PARAM_ORDER, order);
+        Intent i = new Intent().putExtra(MapsActivity.PARAM_ORDER, Parcels.wrap(order));
 
         try {
             pi.send(this, 0, i);
