@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ua.maxim.ordersgeocoder.Data.Order;
-import ua.maxim.ordersgeocoder.MapsActivity;
+import ua.maxim.ordersgeocoder.MapsController;
 
 
 public class DownloadOrders extends IntentService {
@@ -42,7 +42,7 @@ public class DownloadOrders extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
 
-        PendingIntent pi = intent.getParcelableExtra(MapsActivity.PARAM_PINTENT);
+        PendingIntent pi = intent.getParcelableExtra(MapsController.PARAM_PINTENT);
 
         OkHttpClient client = new OkHttpClient();
 
@@ -76,7 +76,7 @@ public class DownloadOrders extends IntentService {
                 Type listType = new TypeToken<List<Order>>(){}.getType();
                 List<Order> orders = (List<Order>) gson.fromJson(jsonString, listType);
 
-                Intent i = new Intent().putExtra(MapsActivity.PARAM_ORDER_LIST, Parcels.wrap((ArrayList) orders));
+                Intent i = new Intent().putExtra(MapsController.PARAM_ORDER_LIST, Parcels.wrap((ArrayList) orders));
                 pi.send(this, 0, i);
 
             } catch (IOException e) {
