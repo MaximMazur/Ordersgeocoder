@@ -10,8 +10,11 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import ua.maxim.ordersgeocoder.Services.DownloadOrders;
+import ua.maxim.ordersgeocoder.Services.GetGeodata;
 
 public class DataBase {
+
+    public static String EXTRAS_ORDER = "ParcelableOrder";
 
     private static DataBase instance;
     private Context context;
@@ -50,7 +53,8 @@ public class DataBase {
         List<Order> orders = (List<Order>) gson.fromJson(jsonString, listType);
 
         for (Order order: orders) {
-            context.startService(new Intent(context, GetGeodata.class).putExtra())
+            context.startService(new Intent(context, GetGeodata.class).putExtra(EXTRAS_ORDER, order));
+//            break;
         }
 
     }

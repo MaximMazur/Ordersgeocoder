@@ -11,6 +11,8 @@ public class Address implements Parcelable{
     private String countryCode;
     private String street;
     private String houseNumber;
+    private double latitude;
+    private double longitude;
 
     public Address() {
     }
@@ -63,6 +65,51 @@ public class Address implements Parcelable{
         this.houseNumber = houseNumber;
     }
 
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    //It assumed, that fields: "City", "CountryCode" and "ZipCode" are always filled
+    // unlike "HouseNumber" and "Street"
+    @Override
+    public String toString() {
+
+        StringBuilder builder = new StringBuilder();
+
+        if (!getHouseNumber().isEmpty()) {
+            builder.append(getHouseNumber());
+        }
+
+        if (!getStreet().isEmpty()){
+            if(builder.length() != 0) builder.append(" ");
+
+            builder.append(getStreet());
+        }
+
+        if (builder.length() != 0) builder.append(", ");
+
+        builder.append(getCity()).append(", ")
+                 /*Country code consists of 3 characters instead of two.
+                 geocoder class not define in some cases coordinates for such situation
+                .append(getCountryCode()).append(" ")*/
+                .append(getZipCode());
+
+
+        return builder.toString();
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -76,6 +123,8 @@ public class Address implements Parcelable{
         dest.writeString(getCountryCode());
         dest.writeString(getStreet());
         dest.writeString(getHouseNumber());
+        dest.writeDouble(getLatitude());
+        dest.writeDouble(getLongitude());
     }
 
     public static Parcelable.Creator<Address> CREATOR = new Creator<Address>() {
@@ -97,5 +146,7 @@ public class Address implements Parcelable{
         setCountryCode(source.readString());
         setStreet(source.readString());
         setHouseNumber(source.readString());
+        setLatitude(source.readDouble());
+        setLongitude(source.readDouble());
     }
 }

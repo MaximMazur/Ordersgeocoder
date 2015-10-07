@@ -39,6 +39,7 @@
         </activity>
 
         <service android:name=".Services.DownloadOrders"/>
+        <service android:name=".Services.GetGeodata"/>
     </application>
 
 </manifest>
