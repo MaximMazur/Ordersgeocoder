@@ -14,15 +14,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import org.parceler.Parcels;
-
-import java.util.List;
-
-import ua.maxim.ordersgeocoder.Data.Order;
-import ua.maxim.ordersgeocoder.Services.DownloadOrders;
-import ua.maxim.ordersgeocoder.Services.GetGeodata;
-
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, MapsInteraction {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, MapsMarkerInteration {
 
     private GoogleMap mMap;
     private final LatLng mHomePosition = new LatLng(51, 10);
@@ -47,9 +39,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mDepartureMarker = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
         mDestinationMarker = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
 
-        mController = new MapsController(this, this);
-        mController.lookForNewOrders();
-
     }
 
     @Override
@@ -59,8 +48,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStart() {
+        super.onStart();
+
+        mController = new MapsController(this, this);
+        mController.lookForOrders();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mController.onStop();
         mController = null;
     }
 
@@ -80,6 +79,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mHomePosition, DEFAULT_ZOOM));
     }
 
+    @Override
     public void drawMarkers(LatLng departure, LatLng destination) {
 
         mMap.addMarker(new MarkerOptions().position(departure).icon(mDepartureMarker));
@@ -88,5 +88,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .add(departure, destination)
                 .width(DEFAULT_WIDTH));
 
+    }
+
+    @Override
+    public void clearMarkers() {
+        if (mMap != null) {
+            mMap.clear();
+        }
     }
 }

@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
 
-public interface MapsInteraction {
+public interface MapsMarkerInteration {
     public void drawMarkers(LatLng departure, LatLng destination);
+    public void clearMarkers();
 }

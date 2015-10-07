@@ -18,7 +18,7 @@ public class MapsController {
     public final static String PARAM_PINTENT = "PendingIntent";
     public final static String PARAM_ORDER = "ParcelableOrder";
 
-    private MapsInteraction mMap;
+    private MapsMarkerInteration mMap;
     private Activity mContext;
     private PendingIntent piDownloadOrders;
     private PendingIntent piGetGeodata;
@@ -28,7 +28,7 @@ public class MapsController {
     private final int mDownloadOrdersTaskCode = 0;
     private final int mGetGeodataTaskCode = 1;
 
-    public MapsController(MapsInteraction map, Activity context){
+    public MapsController(MapsMarkerInteration map, Activity context){
         this.mMap = map;
         this.mContext = context;
 
@@ -37,7 +37,8 @@ public class MapsController {
 
     }
 
-    public void lookForNewOrders() {
+    public void lookForOrders() {
+        mMap.clearMarkers();
         mContext.startService(new Intent(mContext, DownloadOrders.class).putExtra(PARAM_PINTENT, piDownloadOrders));
     }
 
@@ -75,4 +76,9 @@ public class MapsController {
 
     }
 
+
+    public void onStop() {
+        mMap = null;
+        mContext = null;
+    }
 }
