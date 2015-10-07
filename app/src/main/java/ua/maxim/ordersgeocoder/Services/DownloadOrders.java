@@ -1,9 +1,12 @@
 package ua.maxim.ordersgeocoder.Services;
 
 import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -11,8 +14,12 @@ import com.squareup.okhttp.Response;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
-import ua.maxim.ordersgeocoder.Data.DataBase;
+import ua.maxim.ordersgeocoder.Data.Order;
+import ua.maxim.ordersgeocoder.MapsActivity;
 
 
 public class DownloadOrders extends IntentService {
@@ -32,6 +39,9 @@ public class DownloadOrders extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+
+        PendingIntent pi = intent.getParcelableExtra(MapsActivity.PARAM_PINTENT);
+
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()
@@ -59,8 +69,17 @@ public class DownloadOrders extends IntentService {
                 }
 
                 jsonString = result.toString();
-                DataBase.getInstance().addOrdersFromJson(jsonString);
+
+                Gson gson = new Gson();
+                Type listType = new TypeToken<List<Order>>(){}.getType();
+                List<Order> orders = (List<Order>) gson.fromJson(jsonString, listType);
+
+                Intent i = new Intent().putParcelableArrayListExtra(MapsActivity.PARAM_ORDER_LIST, (ArrayList)orders);
+                pi.send(this, 0, i);
+
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (PendingIntent.CanceledException e) {
                 e.printStackTrace();
             }
 

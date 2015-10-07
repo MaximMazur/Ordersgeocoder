@@ -1,5 +1,7 @@
 package ua.maxim.ordersgeocoder;
 
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -13,20 +15,32 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import ua.maxim.ordersgeocoder.Data.DataBase;
+import java.util.List;
+
+import ua.maxim.ordersgeocoder.Data.Order;
+import ua.maxim.ordersgeocoder.Services.DownloadOrders;
+import ua.maxim.ordersgeocoder.Services.GetGeodata;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    public final static String PARAM_PINTENT    = "pendingIntent";
+    public final static String PARAM_ORDER_LIST = "ParcelableOrderList";
+    public final static String PARAM_ORDER      = "ParcelableOrder";
+
+    private final int mDownloadOrdersTaskCode = 0;
+    private final int mGetGeodataTaskCode     = 1;
+
     private GoogleMap mMap;
-    private LatLng HOME_POSITION = new LatLng(51, 10);
-    private LatLng DESTINATION_POSITION = new LatLng(52, 13);
+    private final LatLng mHomePosition = new LatLng(51, 10);
 
     private BitmapDescriptor mDepartureMarker;
     private BitmapDescriptor mDestinationMarker;
 
-    private float DEFAULT_ZOOM = 6.5f;
+    private PendingIntent piDownloadOrders;
+    private PendingIntent piGetGeodata;
 
-    private DataBase mDB;
+    private final float DEFAULT_ZOOM = 6.5f;
+    private final float DEFAULT_WIDTH = 5.0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,18 +55,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mDepartureMarker = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
         mDestinationMarker = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
 
-        DataBase.instantiate(this);
+        piDownloadOrders    = createPendingResult(mDownloadOrdersTaskCode, new Intent(), 0);
+        piGetGeodata        = createPendingResult(mGetGeodataTaskCode, new Intent(), 0);
 
-        mDB = DataBase.getInstance();
+        startService(new Intent(this, DownloadOrders.class).putExtra(PARAM_PINTENT, piDownloadOrders));
 
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-        if(mDB != null) mDB.lookForNewOrders();
+        switch (requestCode){
+            case mDownloadOrdersTaskCode:
 
+                List<Order> orders = data.getParcelableArrayListExtra(PARAM_ORDER_LIST);
+
+                for (Order order: orders) {
+                    startService(new Intent(this, GetGeodata.class)
+                            .putExtra(PARAM_ORDER, order)
+                            .putExtra(PARAM_PINTENT, piGetGeodata));
+                }
+
+                break;
+            case mGetGeodataTaskCode:
+
+                Order order = data.getParcelableExtra(PARAM_ORDER);
+
+                drawOrder(order);
+
+                break;
+        }
     }
 
     /**
@@ -68,17 +101,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        drawOrder(HOME_POSITION, DESTINATION_POSITION);
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(HOME_POSITION, DEFAULT_ZOOM));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mHomePosition, DEFAULT_ZOOM));
     }
 
-    private void drawOrder(LatLng departure, LatLng destination) {
+    private void drawOrder(Order order){
+
+
+        if (order.getDepartureAddress().isCoordinatesSet()
+                && order.getDestinationAddress().isCoordinatesSet()){
+
+            drawMarkers(order.getDepartureAddress().getCoordinates(), order.getDestinationAddress().getCoordinates());
+        }
+
+    }
+
+    private void drawMarkers(LatLng departure, LatLng destination) {
 
         mMap.addMarker(new MarkerOptions().position(departure).icon(mDepartureMarker));
         mMap.addMarker(new MarkerOptions().position(destination).icon(mDestinationMarker));
         mMap.addPolyline((new PolylineOptions())
-                .add(departure, destination));
+                .add(departure, destination)
+                .width(DEFAULT_WIDTH));
 
     }
 }

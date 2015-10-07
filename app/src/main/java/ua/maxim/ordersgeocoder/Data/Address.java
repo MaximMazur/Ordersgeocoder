@@ -3,6 +3,8 @@ package ua.maxim.ordersgeocoder.Data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.android.gms.maps.model.LatLng;
+
 public class Address implements Parcelable{
 
     private String country;
@@ -148,5 +150,13 @@ public class Address implements Parcelable{
         setHouseNumber(source.readString());
         setLatitude(source.readDouble());
         setLongitude(source.readDouble());
+    }
+
+    public boolean isCoordinatesSet() {
+        return (getLatitude() != 0 && getLongitude() != 0);
+    }
+
+    public LatLng getCoordinates() {
+        return new LatLng(getLatitude(), getLongitude());
     }
 }

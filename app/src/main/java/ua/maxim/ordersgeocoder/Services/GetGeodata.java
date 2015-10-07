@@ -1,28 +1,17 @@
 package ua.maxim.ordersgeocoder.Services;
 
 import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 
-import ua.maxim.ordersgeocoder.Data.DataBase;
 import ua.maxim.ordersgeocoder.Data.Order;
-import ua.maxim.ordersgeocoder.R;
+import ua.maxim.ordersgeocoder.MapsActivity;
 
-/**
- * Created by Maxim on 07.10.2015.
- */
 public class GetGeodata extends IntentService {
 
     private int maxTry = 10;
@@ -37,13 +26,21 @@ public class GetGeodata extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Order order = intent.getParcelableExtra(DataBase.EXTRAS_ORDER);
+        PendingIntent pi = intent.getParcelableExtra(MapsActivity.PARAM_PINTENT);
+
+        Order order = intent.getParcelableExtra(MapsActivity.PARAM_ORDER);
 
         identifyCoordinates(order.getDepartureAddress());
 
         identifyCoordinates(order.getDestinationAddress());
 
-//        DataBase.getInstance().updateOrder(order);
+        Intent i = new Intent().putExtra(MapsActivity.PARAM_ORDER, order);
+
+        try {
+            pi.send(this, 0, i);
+        } catch (PendingIntent.CanceledException e) {
+            e.printStackTrace();
+        }
     }
 
     private void identifyCoordinates(ua.maxim.ordersgeocoder.Data.Address address) {
@@ -70,7 +67,7 @@ public class GetGeodata extends IntentService {
 
             do {
                 geoResults = gc.getFromLocationName(address, 1);
-            }while (++currentTry <= 10 && geoResults.size() == 0);
+            }while (++currentTry <= maxTry && geoResults.size() == 0);
 
             if (geoResults.size()>0) {
                 return geoResults.get(0);
