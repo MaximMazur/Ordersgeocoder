@@ -70,6 +70,32 @@ public class Address implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(getCountry());
+        dest.writeString(getZipCode());
+        dest.writeString(getCity());
+        dest.writeString(getCountryCode());
+        dest.writeString(getStreet());
+        dest.writeString(getHouseNumber());
+    }
 
+    public static Parcelable.Creator<Address> CREATOR = new Creator<Address>() {
+        @Override
+        public Address createFromParcel(Parcel source) {
+            return new Address(source);
+        }
+
+        @Override
+        public Address[] newArray(int size) {
+            return new Address[size];
+        }
+    };
+
+    private Address(Parcel source){
+        setCountry(source.readString());
+        setZipCode(source.readString());
+        setCity(source.readString());
+        setCountryCode(source.readString());
+        setStreet(source.readString());
+        setHouseNumber(source.readString());
     }
 }
